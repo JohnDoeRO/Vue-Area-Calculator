@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Tile calculator :: Area Calculator
+    </title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <div class="container pt-5">
+        <h3>Area calculator</h3>
+        <div class="pt-3" id="app">
+            <div class="form-group">
+                <label for="selected_unit">Unit</label>
+                <select v-model="selected_unit" v-on:click="calculate_area()" v-on:keyup="calculate_area()"
+                    class="form-control">
+                    <option v-for="(unit, key) in units" :value="key" :key="key">
+                        {{ unit }} </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="Aria">Aria {{ selected_unit }}&sup2;</label>
+                <input v-on:click="clear_l_w(); calculate_area()" v-on:keyup="clear_l_w(); calculate_area()"
+                    v-model="area" type="number" min="0.50" step="0.01" class="form-control">
+            </div>
+
+            <div>OR</div>
+
+            <div class="form-group">
+                <label for="Length">Length ({{ selected_unit }})</label>
+                <input v-on:click="clear_area(); calculate_area()" v-on:keyup="clear_area(); calculate_area()"
+                    v-model="lenght" type="number" min="0.50" step="0.01" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="Aria">Width ({{ selected_unit }})</label>
+                <input v-on:click="clear_area(); calculate_area()" v-on:keyup="clear_area(); calculate_area()"
+                    v-model="width" type="number" min="0.50" step="0.01" class="form-control">
+            </div>
+
+            <div class="form-check">
+                <input v-model="wastage" v-on:click="select_wastage(); calculate_area(); "
+                    v-on:keyup="select_wastage(); calculate_area()" class="form-check-input" type="checkbox">
+                <label class="form-check-label" for="defaultCheck1">
+                    Add 10% for wastage
+                </label>
+            </div>
+            <hr>
+            <b v-model="calculate_pack()">Pack area: {{ d_pack}} {{ selected_unit }}&sup2;</b><br>
+            <div v-if="area_request">
+                Area requested: {{ area_request }} {{ selected_unit }}&sup2;
+                <i v-if="wastage">(wastage included)</i><br>
+                Area results {{ packs }} packs
+            </div>
+        </div>
+    </div>
+    <script>
+
+        var app = new Vue({
+
+            el: '#app',
+
+            data: {
+                //Data for pack need to come form api
+                pack_area: 1.44, //the source of true
+                d_pack: 0,
+                selected_unit: "m",
+                units: {
+                    'm': 'Meters',
+                    'ft': 'Feets',
+                    'cm': 'Cm'
+                },
+                area: '',
+                area_request: false,
+                lenght: '',
+                width: '',
+                wastage: true,
+                packs: ''
+
+            },
+            methods: {
+                clear_area: function () {
+                    this.area = '',
+                        this.area_request = false
+                },
+                clear_l_w: function () {
+                    this.lenght = '',
+                        this.width = '',
+                        this.area_request = false
+                },
+                calculate_pack: function () {
+                    if (this.selected_unit === "m") {
+                        this.d_pack = this.pack_area
+                    }
+                    else if (this.selected_unit === 'ft') {
+                        this.d_pack = (this.pack_area * 3.28808).toFixed(2)
+                    }
+                    else if (this.selected_unit === 'cm') {
+                        this.d_pack = (this.pack_area * 100).toFixed(2)
+                    }
+
+                },
+                select_wastage: function () {
+                    if (this.wastage) { this.wastage = false }
+                    else { this.wastage = true }
+                },
+                calculate_area: function () {
+                    if (this.area > 0) {
+                        this.area_request = this.area
+                    }
+                    if (this.lenght > 0 && this.width > 0) {
+                        this.area_request = this.lenght * this.width
+                    }
+                    if (this.wastage && this.area_request > 0) {
+                        this.area_request = this.area_request * 1.1
+                    }
+                }
+            },
+            updated() {
+                if (this.area_request > 0) {
+                    this.area_request = parseFloat(this.area_request).toFixed(2)
+                    this.packs = Math.ceil(this.area_request / this.d_pack)
+
+                }
+            }
+
+        })
+    </script>
+</body>
+
+</html>
